@@ -17,16 +17,7 @@ module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
-    .then(async (card) =>
-      res.send({
-        id: card.id,
-        name: card.name,
-        link: card.link,
-        owner: await User.findById(card.owner),
-        likes: card.likes,
-        createAt: card.createAt,
-      })
-    )
+    .then(async (card) => res.send(card))
     .catch((error) => {
       if (error.name === "ValidationError") {
         return res.status(ERROR_CODE).send({
@@ -73,14 +64,7 @@ module.exports.likeCard = (req, res) => {
           .status(ERROR_SEARCH)
           .send({ message: "Передан несуществующий _id карточки" });
       }
-      res.send({
-        id: card.id,
-        name: card.name,
-        link: card.link,
-        owner: card.owner,
-        likes: card.likes,
-        createAt: card.createAt,
-      });
+      res.send(card);
     })
     .catch((error) => {
       if (error.name === "CastError") {

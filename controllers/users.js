@@ -1,7 +1,7 @@
 const User = require("../models/user");
 const ERROR_CODE = 400;
 const ERROR_SEARCH = 404;
-const ERROR_DEFAULT = 500;
+module.exports.ERROR_DEFAULT = 500;
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -17,14 +17,9 @@ module.exports.getUserId = (req, res) => {
       if (!user) {
         res
           .status(ERROR_SEARCH)
-          .send({ message: "Пользователь по указанному _id не найден" });
+          .send({ message: "Пользователь по указанному id не найден" });
       }
-      res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        id: user._id,
-      });
+      res.send(user);
     })
     .catch((error) => {
       if (error.name === "CastError") {
@@ -41,14 +36,7 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) =>
-      res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        id: user.id,
-      })
-    )
+    .then((user) => res.send(user))
     .catch((error) => {
       if (error.name === "ValidationError") {
         return res.status(ERROR_CODE).send({
@@ -74,12 +62,7 @@ module.exports.updateUserInfo = (req, res) => {
           .status(ERROR_SEARCH)
           .send({ message: "Пользователь по указанному _id не найден" });
       }
-      res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        id: user._id,
-      });
+      res.send(user);
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
@@ -104,14 +87,9 @@ module.exports.updateUserAvatar = (req, res) => {
       if (!user) {
         res
           .status(ERROR_SEARCH)
-          .send({ message: "Пользователь по указанному _id не найден" });
+          .send({ message: "Пользователь по указанному id не найден" });
       }
-      res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        id: user._id,
-      });
+      res.send(user);
     })
     .catch((error) => {
       if (error.name === "ValidationError") {

@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const userRouter = require("./routes/users");
 const cardRouter = require("./routes/cards");
+const ERROR_DEFAULT = require("./controllers/users");
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -20,6 +21,13 @@ app.use((req, res, next) => {
 
 app.use(userRouter);
 app.use(cardRouter);
+app.use("*", (req, res) => {
+  try {
+    throw "404 Страница не найдена";
+  } catch (err) {
+    return res.status(404).send({ message: "Что-то пошло не так..." });
+  }
+});
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
