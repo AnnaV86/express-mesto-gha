@@ -46,7 +46,6 @@ module.exports.createUser = (req, res) => {
         name: user.name,
         about: user.about,
         avatar: user.avatar,
-        id: user._id,
       })
     )
     .catch((error) => {
