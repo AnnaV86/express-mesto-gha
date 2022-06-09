@@ -5,7 +5,7 @@ const ERROR_DEFAULT = 500;
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((result) => res.send({ result }))
+    .then((result) => res.send(result))
     .catch((error) =>
       res.status(ERROR_DEFAULT).send({ message: error.message })
     );
@@ -19,7 +19,12 @@ module.exports.getUserId = (req, res) => {
           .status(ERROR_SEARCH)
           .send({ message: "Пользователь по указанному _id не найден" });
       }
-      res.send({ data: user });
+      res.send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        id: user._id,
+      });
     })
     .catch((error) => {
       if (error.name === "CastError") {
@@ -36,7 +41,14 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user) =>
+      res.send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        id: user._id,
+      })
+    )
     .catch((error) => {
       if (error.name === "ValidationError") {
         return res.status(ERROR_CODE).send({
@@ -62,7 +74,12 @@ module.exports.updateUserInfo = (req, res) => {
           .status(ERROR_SEARCH)
           .send({ message: "Пользователь по указанному _id не найден" });
       }
-      res.send({ data: user });
+      res.send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        id: user._id,
+      });
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
@@ -89,7 +106,12 @@ module.exports.updateUserAvatar = (req, res) => {
           .status(ERROR_SEARCH)
           .send({ message: "Пользователь по указанному _id не найден" });
       }
-      res.send({ data: user });
+      res.send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        id: user._id,
+      });
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
