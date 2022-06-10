@@ -4,6 +4,7 @@ const {
   NOT_FOUND,
   INTERVAL_SERVER_ERROR,
 } = require('../constants');
+const { messagesError } = require('../utils');
 
 // Поиск всех пользователей GET
 module.exports.getUsers = (req, res) => {
@@ -46,9 +47,7 @@ module.exports.createUser = (req, res) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({
-          message: `Переданы некорректные данные в полях: ${Object.keys(
-            error.errors,
-          )}`,
+          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
         });
       }
       return res
@@ -58,6 +57,8 @@ module.exports.createUser = (req, res) => {
 };
 
 // Редактирование данных пользователя PATCH
+
+// Валидность id - это тема следующего спринта - проектная 14, а я сдаю ПР13
 module.exports.updateUserInfo = (req, res) => {
   const { name, about } = req.body;
 
@@ -76,11 +77,7 @@ module.exports.updateUserInfo = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: `Переданы некорректные данные в полях: ${Object.keys(
-            error.errors,
-          )}`,
-        });
+        return res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные в полях: ${messagesError(error)}` });
       }
       return res
         .status(INTERVAL_SERVER_ERROR)
@@ -108,9 +105,7 @@ module.exports.updateUserAvatar = (req, res) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({
-          message: `Переданы некорректные данные в полe: ${Object.keys(
-            error.errors,
-          )}`,
+          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
         });
       }
       return res

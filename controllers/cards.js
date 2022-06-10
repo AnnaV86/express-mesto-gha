@@ -1,5 +1,6 @@
 const Card = require('../models/card');
 const { BAD_REQUEST, NOT_FOUND, INTERVAL_SERVER_ERROR } = require('../constants');
+const { messagesError } = require('../utils');
 
 // Поиск всех карточек GET
 module.exports.getCards = (req, res) => {
@@ -20,7 +21,7 @@ module.exports.createCard = (req, res) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({
-          message: `Переданы некорректные данные в полях: ${Object.keys(error.errors)}`,
+          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
         });
       }
       return res
