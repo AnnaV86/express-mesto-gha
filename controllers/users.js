@@ -58,7 +58,6 @@ module.exports.createUser = (req, res) => {
 
 // Редактирование данных пользователя PATCH
 
-// Валидность id - это тема следующего спринта - проектная 14, а я сдаю ПР13
 module.exports.updateUserInfo = (req, res) => {
   const { name, about } = req.body;
 
