@@ -38,14 +38,14 @@ module.exports.login = (req, res, next) => {
 
 // Получение информации о пользователе GET users/me
 module.exports.getProfile = (req, res, next) => User
-  .findOne(req.params.userId)
+  .findById(req.user._id)
   .then((user) => {
     if (!user) {
       res
         .status(NOT_FOUND)
         .send({ message: 'Нет пользователя с таким id' });
     }
-    res.send(user);
+    res.status(200).send(user);
   })
   .catch(next);
 
