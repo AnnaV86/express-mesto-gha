@@ -31,23 +31,18 @@ module.exports.createCard = (req, res) => {
 };
 
 // Удалить карточку по ID DELETE
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardID)
+module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardID)
     .then((card) => {
       if (!card) {
         res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+      } else if (String(card.owner._id) !== req.user._id) {
+        res.status(403).send({ message: 'Удалить чужую карточку невозможно.' });
+      } else {
+        card.remove();
+        res.send({ message: 'Пост удалён' });
       }
-      res.send({ message: 'Пост удалён' });
-    })
-
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({ message: 'Передан некорректный id карточки' });
-      }
-      return res
-        .status(INTERVAL_SERVER_ERROR)
-        .send({ message: `${INTERVAL_SERVER_ERROR}: Ошибка сервера` });
-    });
+    }).catch(next);
 };
 
 // Поставить лайк карточке PUT
