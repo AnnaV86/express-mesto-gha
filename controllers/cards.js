@@ -43,8 +43,8 @@ module.exports.deleteCard = (req, res, next) => {
           .status(FORBIDDEN)
           .send({ message: 'Запрет на удаление чужой карточки.' }));
       } else {
-        card.remove();
-        res.status(200).send({ message: 'Пост удалён' });
+        card.remove()
+          .then(() => res.status(200).send({ message: 'Пост удалён' }));
       }
     }).catch(next);
 };

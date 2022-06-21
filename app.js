@@ -6,7 +6,6 @@ const { login, createUser } = require('./controllers/users');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
-const NotFoundError = require('./errors/not-found-err');
 const { validationUrl } = require('./utils/validationUrl');
 const { INTERVAL_SERVER_ERROR } = require('./constants');
 
@@ -45,14 +44,9 @@ app.use(userRouter);
 app.use(cardRouter);
 
 app.use(errors());
-app.use('*', (req, res, next) => {
-  try { next(new NotFoundError('Страница не найдена')); } catch (error) {
-    next(error);
-  }
-});
+app.use('*', (req, res) => res.status(404).send({ message: 'Запрошен не существующий ресурс' }));
 
 app.use((err, req, res) => {
-  console.log('err>>>>', err);
   const { statusCode = INTERVAL_SERVER_ERROR, message } = err;
   res
     .status(statusCode)

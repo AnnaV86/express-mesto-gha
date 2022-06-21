@@ -6,11 +6,9 @@ const {
   UNAUTHORIZED,
   NOT_FOUND,
   CONFLICT,
-  // INTERVAL_SERVER_ERROR,
   SECRET_KEY,
 } = require('../constants');
 const { messagesError } = require('../utils/messagesError');
-// const NotFoundError = require('../errors/not-found-err');
 
 // Контроллер login
 module.exports.login = (req, res, next) => {
@@ -26,8 +24,10 @@ module.exports.login = (req, res, next) => {
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-      })
-        .end();
+      });
+      res
+        .status(200)
+        .send({ message: 'Вход выполнен' });
     })
     .catch(() => next(
       res
