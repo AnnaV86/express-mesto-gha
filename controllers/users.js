@@ -3,17 +3,14 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
   BAD_REQUEST,
-  // NOT_FOUND,
+  UNAUTHORIZED,
+  NOT_FOUND,
   CONFLICT,
   // INTERVAL_SERVER_ERROR,
   SECRET_KEY,
 } = require('../constants');
 const { messagesError } = require('../utils/messagesError');
-const NotFoundError = require('../errors/not-found-err');
-// const CastError = require('../errors/cast-error');
-// const ValidationError = require('../errors/validation-error');
-// const ConflictError = require('../errors/conflict-error');
-const UnauthorizedError = require('../errors/unauthorized-error');
+// const NotFoundError = require('../errors/not-found-err');
 
 // Контроллер login
 module.exports.login = (req, res, next) => {
@@ -32,7 +29,11 @@ module.exports.login = (req, res, next) => {
       })
         .end();
     })
-    .catch(() => next(new UnauthorizedError('Неправильные почта или пароль')));
+    .catch(() => next(
+      res
+        .status(UNAUTHORIZED)
+        .send({ message: 'Неправильные почта или пароль' }),
+    ));
 };
 
 // Получение информации о пользователе GET users/me
@@ -40,7 +41,9 @@ module.exports.getProfile = (req, res, next) => User
   .findOne(req.params.userId)
   .then((user) => {
     if (!user) {
-      throw new NotFoundError('Нет пользователя с таким id');
+      res
+        .status(NOT_FOUND)
+        .send({ message: 'Нет пользователя с таким id' });
     }
     res.send(user);
   })
@@ -58,7 +61,9 @@ module.exports.getUserId = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по указанному id не найден');
+        res
+          .status(NOT_FOUND)
+          .send({ message: 'Нет пользователя с таким id' });
       }
       res.send(user);
     })
@@ -110,7 +115,9 @@ module.exports.updateUserInfo = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по указанному id не найден');
+        res
+          .status(NOT_FOUND)
+          .send({ message: 'Пользователь по указанному id не найден' });
       }
       res.send(user);
     })
@@ -135,7 +142,9 @@ module.exports.updateUserAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по указанному id не найден');
+        res
+          .status(NOT_FOUND)
+          .send({ message: 'Пользователь по указанному id не найден' });
       }
       res.send(user);
     })

@@ -2,11 +2,9 @@ const Card = require('../models/card');
 const { messagesError } = require('../utils/messagesError');
 const {
   BAD_REQUEST,
+  NOT_FOUND,
   FORBIDDEN,
 } = require('../constants');
-const NotFoundError = require('../errors/not-found-err');
-// const CastError = require('../errors/cast-error');
-// const ValidationError = require('../errors/validation-error');
 
 // Поиск всех карточек GET
 module.exports.getCards = (req, res, next) => {
@@ -37,7 +35,9 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardID)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка с указанным _id не найдена.');
+        res
+          .status(NOT_FOUND)
+          .send({ message: 'Карточка с указанным _id не найдена.' });
       } else if (String(card.owner._id) !== req.user._id) {
         next(res
           .status(FORBIDDEN)
@@ -55,7 +55,9 @@ module.exports.likeCard = (req, res, next) => {
     .populate('owner')
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Передан несуществующий _id карточки');
+        res
+          .status(NOT_FOUND)
+          .send({ message: 'Передан несуществующий _id карточки' });
       }
       res.send(card);
     })
@@ -75,7 +77,9 @@ module.exports.dislikeCard = (req, res, next) => {
     .populate('owner')
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Передан несуществующий _id карточки');
+        res
+          .status(NOT_FOUND)
+          .send({ message: 'Передан несуществующий _id карточки' });
       }
       res.send({
         id: card.id,
