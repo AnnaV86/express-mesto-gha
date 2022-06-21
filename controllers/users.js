@@ -67,7 +67,6 @@ module.exports.getUserId = (req, res, next) => {
         res
           .status(BAD_REQUEST)
           .send({ message: 'Передан некорректный id пользователя' });
-        // next(new CastError('Передан некорректный id пользователя'));
       } next(error);
     });
 };

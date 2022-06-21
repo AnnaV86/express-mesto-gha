@@ -1,9 +1,12 @@
 const Card = require('../models/card');
 const { messagesError } = require('../utils/messagesError');
+const {
+  BAD_REQUEST,
+  FORBIDDEN,
+} = require('../constants');
 const NotFoundError = require('../errors/not-found-err');
-const CastError = require('../errors/cast-error');
-const ValidationError = require('../errors/validation-error');
-const ForbiddenError = require('../errors/forbidden-error');
+// const CastError = require('../errors/cast-error');
+// const ValidationError = require('../errors/validation-error');
 
 // Поиск всех карточек GET
 module.exports.getCards = (req, res, next) => {
@@ -21,7 +24,9 @@ module.exports.createCard = (req, res, next) => {
     .then(async (card) => res.send(card))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new ValidationError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
+        next(res.status(BAD_REQUEST).send({
+          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
+        }));
       }
       next(error);
     });
@@ -34,7 +39,9 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Карточка с указанным _id не найдена.');
       } else if (String(card.owner._id) !== req.user._id) {
-        throw new ForbiddenError('Запрет на удаление чужой карточки.');
+        next(res
+          .status(FORBIDDEN)
+          .send({ message: 'Запрет на удаление чужой карточки.' }));
       } else {
         card.remove();
         res.status(200).send({ message: 'Пост удалён' });
@@ -54,7 +61,9 @@ module.exports.likeCard = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        next(new CastError('Переданы некорректные данные для постановки лайка'));
+        res
+          .status(BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные для постановки лайка' });
       }
       next(error);
     });
@@ -79,7 +88,9 @@ module.exports.dislikeCard = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        next(new CastError('Переданы некорректные данные для постановки лайка'));
+        res
+          .status(BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные для постановки лайка' });
       }
       next(error);
     });
