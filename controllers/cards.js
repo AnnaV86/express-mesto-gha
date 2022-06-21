@@ -1,32 +1,29 @@
 const Card = require('../models/card');
-const { BAD_REQUEST, NOT_FOUND, INTERVAL_SERVER_ERROR } = require('../constants');
-const { messagesError } = require('../utils');
+const { messagesError } = require('../utils/messagesError');
+const NotFoundError = require('../errors/not-found-err');
+const CastError = require('../errors/cast-error');
+const ValidationError = require('../errors/validation-error');
+const ForbiddenError = require('../errors/forbidden-error');
 
 // Поиск всех карточек GET
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate('owner')
     .then((result) => res.send(result))
-    .catch(() => res
-      .status(INTERVAL_SERVER_ERROR)
-      .send({ message: `${INTERVAL_SERVER_ERROR}: Ошибка сервера` }));
+    .catch(next);
 };
 
 // Создание карточки POST
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
     .then(async (card) => res.send(card))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
-        });
+        next(new ValidationError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
       }
-      return res
-        .status(INTERVAL_SERVER_ERROR)
-        .send({ message: `${INTERVAL_SERVER_ERROR}: Ошибка сервера` });
+      next(error);
     });
 };
 
@@ -35,9 +32,9 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardID)
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
+        throw new NotFoundError('Карточка с указанным _id не найдена.');
       } else if (String(card.owner._id) !== req.user._id) {
-        res.status(403).send({ message: 'Удалить чужую карточку невозможно.' });
+        throw new ForbiddenError('Запрет на удаление чужой карточки.');
       } else {
         card.remove();
         res.send({ message: 'Пост удалён' });
@@ -46,34 +43,30 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 // Поставить лайк карточке PUT
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .populate('owner')
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
+        throw new NotFoundError('Передан несуществующий _id карточки');
       }
       res.send(card);
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({
-          message: 'Переданы некорректные данные для постановки лайка',
-        });
+        next(new CastError('Переданы некорректные данные для постановки лайка'));
       }
-      return res
-        .status(INTERVAL_SERVER_ERROR)
-        .send({ message: `${INTERVAL_SERVER_ERROR}: Ошибка сервера` });
+      next(error);
     });
 };
 
 // Убрать лайк DELETE
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .populate('owner')
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки' });
+        throw new NotFoundError('Передан несуществующий _id карточки');
       }
       res.send({
         id: card.id,
@@ -86,12 +79,8 @@ module.exports.dislikeCard = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные для снятия лайка' });
+        next(new CastError('Переданы некорректные данные для постановки лайка'));
       }
-      return res
-        .status(INTERVAL_SERVER_ERROR)
-        .send({ message: `${INTERVAL_SERVER_ERROR}: Ошибка сервера` });
+      next(error);
     });
 };

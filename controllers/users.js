@@ -1,14 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  INTERVAL_SERVER_ERROR,
-  SECRET_KEY,
-} = require('../constants');
-const { messagesError } = require('../utils');
+const { SECRET_KEY } = require('../constants');
+const { messagesError } = require('../utils/messagesError');
 const NotFoundError = require('../errors/not-found-err');
 const CastError = require('../errors/cast-error');
-const BadRequestError = require('../errors/bad-request-error');
+const ValidationError = require('../errors/validation-error');
+const ConflictError = require('../errors/conflict-error');
 
 // Контроллер login
 module.exports.login = (req, res, next) => {
@@ -77,7 +75,9 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new CastError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
+        next(new ValidationError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
+      } else if (error.code === 11000) {
+        next(new ConflictError('Пользователем с данным email уже зарегистрирован'));
       }
       return next(error);
     });
@@ -85,7 +85,7 @@ module.exports.createUser = (req, res, next) => {
 
 // Редактирование данных пользователя PATCH
 
-module.exports.updateUserInfo = (req, res) => {
+module.exports.updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -95,24 +95,20 @@ module.exports.updateUserInfo = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному _id не найден' });
+        throw new NotFoundError('Пользователь по указанному id не найден');
       }
       res.send(user);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные в полях: ${messagesError(error)}` });
+        next(new ValidationError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
       }
-      return res
-        .status(INTERVAL_SERVER_ERROR)
-        .send({ message: `${INTERVAL_SERVER_ERROR}: Ошибка сервера` });
+      return next(error);
     });
 };
 
 // Редактирование аватара пользователя PATCH
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -122,20 +118,14 @@ module.exports.updateUserAvatar = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному id не найден' });
+        throw new NotFoundError('Пользователь по указанному id не найден');
       }
       res.send(user);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({
-          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
-        });
+        next(new ValidationError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
       }
-      return res
-        .status(INTERVAL_SERVER_ERROR)
-        .send({ message: `${INTERVAL_SERVER_ERROR}: Ошибка сервера` });
+      return next(error);
     });
 };
