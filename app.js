@@ -45,6 +45,11 @@ app.use(userRouter);
 app.use(cardRouter);
 
 app.use(errors());
+app.use('*', (req, res, next) => {
+  try { next(new NotFoundError('Страница не найдена')); } catch (error) {
+    next(error);
+  }
+});
 
 app.use((err, req, res) => {
   console.log('err>>>>', err);
@@ -58,7 +63,6 @@ app.use((err, req, res) => {
     });
 });
 
-app.use('*', (req, res, next) => next(new NotFoundError('Страница не найдена')));
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`server start: ${PORT}`);

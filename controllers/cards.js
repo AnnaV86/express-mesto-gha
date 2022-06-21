@@ -37,7 +37,7 @@ module.exports.deleteCard = (req, res, next) => {
         throw new ForbiddenError('Запрет на удаление чужой карточки.');
       } else {
         card.remove();
-        res.send({ message: 'Пост удалён' });
+        res.status(200).send({ message: 'Пост удалён' });
       }
     }).catch(next);
 };
