@@ -1,12 +1,19 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { SECRET_KEY } = require('../constants');
+const {
+  BAD_REQUEST,
+  // NOT_FOUND,
+  CONFLICT,
+  // INTERVAL_SERVER_ERROR,
+  SECRET_KEY,
+} = require('../constants');
 const { messagesError } = require('../utils/messagesError');
 const NotFoundError = require('../errors/not-found-err');
-const CastError = require('../errors/cast-error');
-const ValidationError = require('../errors/validation-error');
-const ConflictError = require('../errors/conflict-error');
+// const CastError = require('../errors/cast-error');
+// const ValidationError = require('../errors/validation-error');
+// const ConflictError = require('../errors/conflict-error');
+const UnauthorizedError = require('../errors/unauthorized-error');
 
 // Контроллер login
 module.exports.login = (req, res, next) => {
@@ -25,7 +32,7 @@ module.exports.login = (req, res, next) => {
       })
         .end();
     })
-    .catch(next);
+    .catch(() => next(new UnauthorizedError('Неправильные почта или пароль')));
 };
 
 // Получение информации о пользователе GET users/me
@@ -57,8 +64,11 @@ module.exports.getUserId = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        next(new CastError('Передан некорректный id пользователя'));
-      } else next(error);
+        res
+          .status(BAD_REQUEST)
+          .send({ message: 'Передан некорректный id пользователя' });
+        // next(new CastError('Передан некорректный id пользователя'));
+      } next(error);
     });
 };
 
@@ -72,14 +82,20 @@ module.exports.createUser = (req, res, next) => {
       about: req.body.about,
       avatar: req.body.avatar,
     }))
-    .then((user) => res.send(user))
+    .then((user) => res.send({
+      name: user.name, about: user.about, avatar: user.avatar, _id: user._id, email: user.email,
+    }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new ValidationError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
+        next(res.status(BAD_REQUEST).send({
+          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
+        }));
       } else if (error.code === 11000) {
-        next(new ConflictError('Пользователем с данным email уже зарегистрирован'));
+        next(res.status(CONFLICT).send({
+          message: 'Пользователем с данным email уже зарегистрирован',
+        }));
       }
-      return next(error);
+      next(error);
     });
 };
 
@@ -101,9 +117,11 @@ module.exports.updateUserInfo = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new ValidationError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
+        next(res.status(BAD_REQUEST).send({
+          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
+        }));
       }
-      return next(error);
+      next(error);
     });
 };
 
@@ -124,8 +142,10 @@ module.exports.updateUserAvatar = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new ValidationError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
+        next(res.status(BAD_REQUEST).send({
+          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
+        }));
       }
-      return next(error);
+      next(error);
     });
 };
