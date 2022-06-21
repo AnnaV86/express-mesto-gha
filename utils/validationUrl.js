@@ -1,7 +1,7 @@
-module.exports.validAvatar = (url) => {
+module.exports.validationUrl = (url, helpers) => {
   const regex = /^https?:\/\/(www\.)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?$/g;
   if (regex.test(url)) {
     return url;
   }
-  throw new Error('Invalid url');
+  return helpers.error('Ошибка url');
 };

@@ -1,13 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found-err');
-const { validAvatar } = require('./utils/validationUrl');
+const { validationUrl } = require('./utils/validationUrl');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -34,7 +34,7 @@ app.post('/signup', celebrate({
     password: Joi.string().required().min(8),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().custom(validAvatar),
+    avatar: Joi.string().custom(validationUrl),
   }),
 }), createUser);
 
@@ -43,6 +43,7 @@ app.use(auth);
 app.use(userRouter);
 app.use(cardRouter);
 
+app.use(errors());
 app.use((err, req, res) => {
   const { statusCode = 500, message } = err;
   res
