@@ -4,7 +4,6 @@ const FORBIDDEN = 403;
 const NOT_FOUND = 404;
 const CONFLICT = 409;
 const INTERVAL_SERVER_ERROR = 500;
-const SECRET_KEY = 'my_secret_key';
 
 module.exports = {
   BAD_REQUEST,
@@ -13,5 +12,4 @@ module.exports = {
   NOT_FOUND,
   CONFLICT,
   INTERVAL_SERVER_ERROR,
-  SECRET_KEY,
 };

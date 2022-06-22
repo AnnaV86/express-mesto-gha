@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-const { UNAUTHORIZED, SECRET_KEY } = require('../constants');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
+const { UNAUTHORIZED } = require('../constants');
 
 const handleAuthError = (res) => {
   res
@@ -14,7 +16,7 @@ module.exports = (req, res, next) => {
   }
   let payload;
   try {
-    payload = jwt.verify(token.jwt, SECRET_KEY);
+    payload = jwt.verify(token.jwt, NODE_ENV ? JWT_SECRET : 'dev-secret');
   } catch (error) {
     return handleAuthError(res);
   }
