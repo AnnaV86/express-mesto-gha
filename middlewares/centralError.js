@@ -4,7 +4,7 @@ module.exports = (err, req, res) => {
   const { statusCode = INTERVAL_SERVER_ERROR, message } = err;
   res
     .status(statusCode)
-    .json({
+    .send({
       status: 'error',
       statusCode,
       message: statusCode === INTERVAL_SERVER_ERROR
