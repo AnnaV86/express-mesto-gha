@@ -9,6 +9,7 @@ const cardRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
 const centralError = require('./middlewares/centralError');
 const { validationUrl } = require('./utils/validationUrl');
+const NotFoundError = require('./errors/notFoundError');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -45,7 +46,9 @@ app.use(userRouter);
 app.use(cardRouter);
 
 app.use(errors());
-app.use('*', (req, res) => res.status(404).send({ message: 'Запрошен не существующий ресурс' }));
+app.use('*', (req, res, next) => next(
+  new NotFoundError('Запрошен не существующий ресурс'),
+));
 
 app.use(centralError);
 
