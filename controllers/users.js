@@ -5,8 +5,8 @@ const User = require('../models/user');
 const { NODE_ENV, JWT_SECRET } = process.env;
 const NotFoundError = require('../errors/notFoundError');
 const UnauthorizedError = require('../errors/unauthorizedError');
+const BadRequestError = require('../errors/badRequestError');
 const {
-  BAD_REQUEST,
   CONFLICT,
 } = require('../constants');
 const { messagesError } = require('../utils/messagesError');
@@ -62,9 +62,7 @@ module.exports.getUserId = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: 'Передан некорректный id пользователя' });
+        next(new BadRequestError('Передан некорректный id пользователя'));
       } next(error);
     });
 };
@@ -84,9 +82,7 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(res.status(BAD_REQUEST).send({
-          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
-        }));
+        next(new BadRequestError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
       } else if (error.code === 11000) {
         next(res.status(CONFLICT).send({
           message: 'Пользователем с данным email уже зарегистрирован',
@@ -114,9 +110,7 @@ module.exports.updateUserInfo = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(res.status(BAD_REQUEST).send({
-          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
-        }));
+        next(new BadRequestError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
       }
       next(error);
     });
@@ -139,9 +133,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(res.status(BAD_REQUEST).send({
-          message: `Переданы некорректные данные в полях: ${messagesError(error)}`,
-        }));
+        next(new BadRequestError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
       }
       next(error);
     });
