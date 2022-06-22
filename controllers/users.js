@@ -4,6 +4,7 @@ const User = require('../models/user');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 const NotFoundError = require('../errors/notFoundError');
+const UnauthorizedError = require('../errors/unauthorizedError')
 const {
   BAD_REQUEST,
   UNAUTHORIZED,
@@ -30,11 +31,7 @@ module.exports.login = (req, res, next) => {
         .status(200)
         .send({ message: 'Вход выполнен' });
     })
-    .catch(() => next(
-      res
-        .status(UNAUTHORIZED)
-        .send({ message: 'Неправильные почта или пароль' }),
-    ));
+    .catch(() => next(new UnauthorizedError('Неправильные почта или пароль')));
 };
 
 // Получение информации о пользователе GET users/me
