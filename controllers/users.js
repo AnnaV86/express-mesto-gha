@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
+const NotFoundError = require('../errors/notFoundError');
 const {
   BAD_REQUEST,
   UNAUTHORIZED,
@@ -42,9 +43,10 @@ module.exports.getProfile = (req, res, next) => User
   .findById(req.user._id)
   .then((user) => {
     if (!user) {
-      res
-        .status(NOT_FOUND)
-        .send({ message: 'Нет пользователя с таким id' });
+      throw new NotFoundError('Нет пользователя с таким id');
+      // res
+      //   .status(NOT_FOUND)
+      //   .send({ message: 'Нет пользователя с таким id' });
     }
     res.status(200).send(user);
   })
@@ -62,9 +64,10 @@ module.exports.getUserId = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Нет пользователя с таким id' });
+        throw new NotFoundError('Нет пользователя с таким id');
+        // res
+        //   .status(NOT_FOUND)
+        //   .send({ message: 'Нет пользователя с таким id' });
       }
       res.send(user);
     })
