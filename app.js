@@ -7,8 +7,8 @@ const { login, createUser } = require('./controllers/users');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
+const centralError = require('./middlewares/centralError');
 const { validationUrl } = require('./utils/validationUrl');
-const { INTERVAL_SERVER_ERROR } = require('./constants');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -47,16 +47,7 @@ app.use(cardRouter);
 app.use(errors());
 app.use('*', (req, res) => res.status(404).send({ message: 'Запрошен не существующий ресурс' }));
 
-app.use((err, req, res) => {
-  const { statusCode = INTERVAL_SERVER_ERROR, message } = err;
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === INTERVAL_SERVER_ERROR
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-});
+app.use(centralError);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
