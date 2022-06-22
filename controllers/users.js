@@ -6,9 +6,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 const NotFoundError = require('../errors/notFoundError');
 const UnauthorizedError = require('../errors/unauthorizedError');
 const BadRequestError = require('../errors/badRequestError');
-const {
-  CONFLICT,
-} = require('../constants');
+const ConflictError = require('../errors/conflictError');
 const { messagesError } = require('../utils/messagesError');
 
 // Контроллер login
@@ -84,9 +82,7 @@ module.exports.createUser = (req, res, next) => {
       if (error.name === 'ValidationError') {
         next(new BadRequestError(`Переданы некорректные данные в полях: ${messagesError(error)}`));
       } else if (error.code === 11000) {
-        next(res.status(CONFLICT).send({
-          message: 'Пользователем с данным email уже зарегистрирован',
-        }));
+        next(new ConflictError('Пользователем с данным email уже зарегистрирован'));
       }
       next(error);
     });
