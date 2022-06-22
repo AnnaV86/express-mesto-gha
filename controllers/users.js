@@ -7,7 +7,6 @@ const NotFoundError = require('../errors/notFoundError');
 const {
   BAD_REQUEST,
   UNAUTHORIZED,
-  NOT_FOUND,
   CONFLICT,
 } = require('../constants');
 const { messagesError } = require('../utils/messagesError');
@@ -44,9 +43,6 @@ module.exports.getProfile = (req, res, next) => User
   .then((user) => {
     if (!user) {
       throw new NotFoundError('Нет пользователя с таким id');
-      // res
-      //   .status(NOT_FOUND)
-      //   .send({ message: 'Нет пользователя с таким id' });
     }
     res.status(200).send(user);
   })
@@ -65,9 +61,6 @@ module.exports.getUserId = (req, res, next) => {
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Нет пользователя с таким id');
-        // res
-        //   .status(NOT_FOUND)
-        //   .send({ message: 'Нет пользователя с таким id' });
       }
       res.send(user);
     })
@@ -119,9 +112,7 @@ module.exports.updateUserInfo = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному id не найден' });
+        throw new NotFoundError('Пользователь по указанному id не найден');
       }
       res.send(user);
     })
@@ -146,9 +137,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному id не найден' });
+        throw new NotFoundError('Пользователь по указанному id не найден');
       }
       res.send(user);
     })
