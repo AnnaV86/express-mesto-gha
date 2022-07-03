@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const { celebrate, Joi, errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/loggers');
 const { login, createUser } = require('./controllers/users');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
@@ -22,33 +23,41 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 });
 
 app.use(express.json());
+app.use(requestLogger);
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8),
+    }),
   }),
-}), login);
+  login,
+);
 
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().custom(validationUrl),
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8),
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string().custom(validationUrl),
+    }),
   }),
-}), createUser);
+  createUser,
+);
 
 app.use(auth);
 
 app.use(userRouter);
 app.use(cardRouter);
+app.use(errorLogger);
 
 app.use(errors());
-app.use('*', (req, res, next) => next(
-  new NotFoundError('Запрошен не существующий ресурс'),
-));
+app.use('*', (req, res, next) => next(new NotFoundError('Запрошен не существующий ресурс')));
 
 app.use(centralError);
 
